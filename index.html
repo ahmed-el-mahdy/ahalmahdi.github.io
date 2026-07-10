@@ -10,6 +10,7 @@
   <meta property="og:title" content="Ahmed ElMahdy | Senior Cloud DevOps Engineer">
   <meta property="og:description" content="Production platform transformation across Azure, AKS, Terraform, GitHub Actions, APIM, Key Vault, and observability.">
   <meta name="theme-color" content="#081112">
+  <link rel="preload" as="image" href="assets/platform-hero-v2.avif" type="image/avif" fetchpriority="high">
   <style>
     :root {
       --bg: #081112;
@@ -35,10 +36,39 @@
       background: var(--bg);
       color: var(--ink);
       line-height: 1.6;
+      position: relative;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(38, 215, 194, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(38, 215, 194, 0.028) 1px, transparent 1px);
+      background-size: 96px 96px;
+      mask-image: linear-gradient(180deg, transparent, #000 20%, #000 82%, transparent);
+    }
+    body > * {
+      position: relative;
+      z-index: 1;
     }
 
     a { color: inherit; }
     img { max-width: 100%; display: block; }
+    .scroll-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      z-index: 60;
+      transform: scaleX(0);
+      transform-origin: left;
+      background: linear-gradient(90deg, var(--teal), var(--cyan), var(--amber));
+      box-shadow: 0 0 18px rgba(38, 215, 194, 0.45);
+    }
     .skip-link {
       position: absolute;
       left: -999px;
@@ -127,6 +157,14 @@
         linear-gradient(90deg, rgba(8,17,18,0.98) 0%, rgba(8,17,18,0.88) 38%, rgba(8,17,18,0.38) 72%, rgba(8,17,18,0.72) 100%),
         linear-gradient(180deg, rgba(8,17,18,0.12), rgba(8,17,18,0.82)),
         url("assets/platform-hero-v2.png") center right / cover no-repeat;
+      background:
+        linear-gradient(90deg, rgba(8,17,18,0.98) 0%, rgba(8,17,18,0.88) 38%, rgba(8,17,18,0.38) 72%, rgba(8,17,18,0.72) 100%),
+        linear-gradient(180deg, rgba(8,17,18,0.12), rgba(8,17,18,0.82)),
+        image-set(
+          url("assets/platform-hero-v2.avif") type("image/avif"),
+          url("assets/platform-hero-v2.webp") type("image/webp"),
+          url("assets/platform-hero-v2.png") type("image/png")
+        ) center right / cover no-repeat;
     }
     .hero::after {
       content: "";
@@ -199,6 +237,36 @@
       border-color: transparent;
     }
     .btn:hover { transform: translateY(-1px); }
+    .btn,
+    .signal,
+    .impact-board,
+    .case,
+    .role,
+    .project,
+    .stack-group,
+    .cert,
+    .metric,
+    .contact-box,
+    .tags span {
+      transition:
+        transform 0.28s ease,
+        border-color 0.28s ease,
+        box-shadow 0.28s ease,
+        background-color 0.28s ease;
+    }
+    .signal:hover,
+    .impact-board:hover,
+    .case:hover,
+    .role:hover,
+    .project:hover,
+    .stack-group:hover,
+    .cert:hover,
+    .metric:hover,
+    .contact-box:hover {
+      transform: translateY(-3px);
+      border-color: rgba(38, 215, 194, 0.34);
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22), 0 0 28px rgba(38, 215, 194, 0.06);
+    }
     .signal-row {
       display: grid;
       grid-template-columns: repeat(4, minmax(130px, 1fr));
@@ -212,6 +280,9 @@
       background: rgba(8, 17, 18, 0.72);
       padding: 16px;
       min-height: 96px;
+      position: relative;
+      overflow: hidden;
+      animation: signalCardCycle 9.6s ease-in-out infinite;
     }
     .signal strong {
       display: block;
@@ -219,6 +290,7 @@
       font-size: 28px;
       line-height: 1;
       margin-bottom: 8px;
+      animation: metricGlow 4.6s ease-in-out infinite;
     }
     .signal span {
       color: var(--muted);
@@ -245,6 +317,7 @@
       font-size: clamp(32px, 3.6vw, 46px);
       line-height: 1;
       font-weight: 900;
+      animation: metricGlow 4.8s ease-in-out infinite;
     }
     .scope-item span {
       margin-top: 8px;
@@ -255,13 +328,363 @@
       letter-spacing: 0.12em;
     }
 
+    @keyframes flowLine {
+      0%, 100% {
+        opacity: 0.35;
+        transform: translateX(-10px) scaleX(0.86);
+      }
+      50% {
+        opacity: 0.95;
+        transform: translateX(10px) scaleX(1);
+      }
+    }
+    @keyframes metricGlow {
+      0%, 100% {
+        text-shadow: 0 0 0 rgba(38, 215, 194, 0);
+      }
+      50% {
+        text-shadow: 0 0 18px rgba(38, 215, 194, 0.34);
+      }
+    }
+    @keyframes nodePulse {
+      0%, 100% {
+        opacity: 0.45;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1.45);
+      }
+    }
+    @keyframes autoSignalSweep {
+      0%, 62%, 100% {
+        opacity: 0;
+        transform: translateX(-115%);
+      }
+      8% {
+        opacity: 1;
+      }
+      20% {
+        opacity: 0.85;
+        transform: translateX(115%);
+      }
+      26% {
+        opacity: 0;
+        transform: translateX(115%);
+      }
+    }
+    @keyframes signalCardCycle {
+      0%, 66%, 100% {
+        border-color: var(--line);
+        background-color: rgba(8, 17, 18, 0.72);
+        box-shadow: none;
+      }
+      10%, 22% {
+        border-color: rgba(38, 215, 194, 0.36);
+        background-color: rgba(38, 215, 194, 0.055);
+        box-shadow: 0 0 26px rgba(38, 215, 194, 0.08);
+      }
+    }
+    @keyframes signalSweep {
+      from { transform: translateX(-115%); }
+      to { transform: translateX(115%); }
+    }
+    @keyframes sectionSignalPacket {
+      0% {
+        opacity: 0;
+        transform: translateX(-18%) scaleX(0.65);
+      }
+      18%, 62% {
+        opacity: 0.85;
+      }
+      100% {
+        opacity: 0;
+        transform: translateX(118%) scaleX(1);
+      }
+    }
+    @keyframes diagramPacket {
+      0% {
+        opacity: 0;
+        transform: translateX(0) scale(0.72);
+      }
+      15%, 70% {
+        opacity: 0.95;
+      }
+      100% {
+        opacity: 0;
+        transform: translateX(var(--travel, 460px)) scale(1);
+      }
+    }
+    @keyframes diagramStageLive {
+      0%, 100% {
+        border-color: var(--line);
+        background-color: rgba(255, 255, 255, 0.032);
+      }
+      50% {
+        border-color: rgba(38, 215, 194, 0.28);
+        background-color: rgba(38, 215, 194, 0.045);
+      }
+    }
+    @keyframes diagramCoreLive {
+      0%, 100% {
+        box-shadow: 0 0 20px rgba(38, 215, 194, 0.1);
+        transform: scale(1);
+      }
+      50% {
+        box-shadow: 0 0 34px rgba(38, 215, 194, 0.22);
+        transform: scale(1.025);
+      }
+    }
+    @keyframes diagramNodeLive {
+      0%, 100% {
+        box-shadow: 0 0 10px rgba(38, 215, 194, 0.34);
+        opacity: 0.75;
+      }
+      50% {
+        box-shadow: 0 0 18px rgba(38, 215, 194, 0.72);
+        opacity: 1;
+      }
+    }
+    @keyframes sectionAmbientShift {
+      from {
+        opacity: 0.28;
+        transform: translate3d(-10px, -8px, 0);
+      }
+      to {
+        opacity: 0.48;
+        transform: translate3d(10px, 8px, 0);
+      }
+    }
+    @keyframes calmSignalSweep {
+      0%, 72%, 100% {
+        opacity: 0;
+        transform: translateX(-115%);
+      }
+      10% {
+        opacity: 0.72;
+      }
+      24% {
+        opacity: 0;
+        transform: translateX(115%);
+      }
+    }
+    @keyframes orbitSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes orbitPulse {
+      0%, 100% {
+        opacity: 0.28;
+        transform: scale(0.96);
+      }
+      50% {
+        opacity: 0.62;
+        transform: scale(1.04);
+      }
+    }
+    @keyframes satSignal {
+      0%, 100% {
+        border-color: rgba(125, 211, 252, 0.24);
+        box-shadow: none;
+      }
+      50% {
+        border-color: rgba(38, 215, 194, 0.45);
+        box-shadow: 0 0 18px rgba(38, 215, 194, 0.14);
+      }
+    }
+
+    @keyframes heroRise {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .hero-animate {
+      opacity: 0;
+      animation: heroRise 0.75s ease forwards;
+    }
+    .hero-delay-1 { animation-delay: 0.08s; }
+    .hero-delay-2 { animation-delay: 0.16s; }
+    .hero-delay-3 { animation-delay: 0.24s; }
+    .hero-delay-4 { animation-delay: 0.32s; }
+    .hero-delay-5 { animation-delay: 0.4s; }
+    .hero-delay-6 { animation-delay: 0.48s; }
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+      will-change: opacity, transform;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      body::before {
+        animation: none;
+      }
+      main::before {
+        animation: none;
+      }
+      main section::after,
+      .signal strong,
+      .scope-item strong,
+      .metric strong,
+      .signal,
+      .signal::before,
+      main section > .wrap::before,
+      main section > .wrap::after,
+      .diagram-flow span,
+      #architecture .diagram-stage,
+      #architecture .cluster-ring::before,
+      #architecture .cluster-ring::after,
+      #architecture .cluster-sat,
+      #architecture .diagram-node::before,
+      #architecture .cluster-core,
+      .impact-board::before,
+      .case::before,
+      .role::before,
+      .project::before,
+      .stack-group::before,
+      .cert::before,
+      .metric::before,
+      .contact-box::before {
+        animation: none;
+      }
+      .hero-animate,
+      .reveal {
+        opacity: 1;
+        transform: none;
+        animation: none;
+        transition: none;
+      }
+    }
+
+    main {
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 82% 6%, rgba(38, 215, 194, 0.1), transparent 28%),
+        radial-gradient(circle at 12% 34%, rgba(125, 211, 252, 0.06), transparent 26%),
+        radial-gradient(circle at 88% 64%, rgba(245, 184, 75, 0.055), transparent 24%),
+        linear-gradient(180deg, #081112 0%, #0a1517 36%, #071011 100%);
+    }
+    main::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.55;
+      background-image:
+        linear-gradient(rgba(125, 211, 252, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(125, 211, 252, 0.04) 1px, transparent 1px),
+        linear-gradient(115deg, transparent 0 48%, rgba(38, 215, 194, 0.08) 49%, transparent 51% 100%);
+      background-size: 140px 140px, 140px 140px, 620px 360px;
+      mask-image: linear-gradient(180deg, transparent 0, #000 7%, #000 93%, transparent 100%);
+    }
+    main::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 76% 14%, rgba(38, 215, 194, 0.18) 0 2px, transparent 3px),
+        radial-gradient(circle at 88% 28%, rgba(125, 211, 252, 0.14) 0 2px, transparent 3px),
+        radial-gradient(circle at 70% 46%, rgba(38, 215, 194, 0.16) 0 2px, transparent 3px),
+        radial-gradient(circle at 86% 70%, rgba(245, 184, 75, 0.13) 0 2px, transparent 3px),
+        linear-gradient(150deg, transparent 0 54%, rgba(38, 215, 194, 0.08) 54.2%, transparent 55% 100%);
+      opacity: 0.7;
+      mask-image: linear-gradient(90deg, transparent, #000 45%, #000 100%);
+    }
     main section {
       padding: 86px 0;
       border-bottom: 1px solid var(--line);
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 26% 16%, rgba(38, 215, 194, 0.08), transparent 26%),
+        radial-gradient(circle at 82% 68%, rgba(125, 211, 252, 0.065), transparent 25%),
+        linear-gradient(135deg, rgba(8, 17, 18, 0.98), rgba(7, 16, 17, 0.94));
     }
+    main section::before {
+      content: attr(data-watermark);
+      position: absolute;
+      top: 34px;
+      right: max(20px, calc((100% - var(--max)) / 2));
+      z-index: 0;
+      max-width: 62%;
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(125, 211, 252, 0.14);
+      font-size: clamp(44px, 8vw, 118px);
+      font-weight: 950;
+      line-height: 0.9;
+      letter-spacing: 0;
+      opacity: 0.32;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    main section::after {
+      content: "";
+      position: absolute;
+      right: max(20px, calc((100% - var(--max)) / 2));
+      top: 42%;
+      width: min(420px, 34vw);
+      height: 1px;
+      z-index: 0;
+      pointer-events: none;
+      background: linear-gradient(90deg, transparent, rgba(38, 215, 194, 0.28), transparent);
+      transform-origin: center;
+      animation: flowLine 5.5s ease-in-out infinite;
+      box-shadow:
+        0 -42px 0 rgba(125, 211, 252, 0.08),
+        0 42px 0 rgba(245, 184, 75, 0.07);
+    }
+    main section > .wrap::before {
+      content: "";
+      position: absolute;
+      inset: -34px -28px;
+      z-index: -1;
+      pointer-events: none;
+      border-radius: 8px;
+      background:
+        linear-gradient(120deg, transparent 0 52%, rgba(38, 215, 194, 0.08) 52.4%, transparent 54% 100%),
+        linear-gradient(78deg, transparent 0 67%, rgba(125, 211, 252, 0.06) 67.4%, transparent 68.8% 100%),
+        radial-gradient(circle at 78% 12%, rgba(38, 215, 194, 0.1), transparent 20%),
+        radial-gradient(circle at 10% 82%, rgba(245, 184, 75, 0.06), transparent 18%);
+      opacity: 0.34;
+      transform: translate3d(0, 0, 0);
+      animation: sectionAmbientShift 22s ease-in-out infinite alternate;
+    }
+    main section > .wrap::after {
+      content: "";
+      position: absolute;
+      left: -8%;
+      right: -8%;
+      top: 58%;
+      z-index: -1;
+      height: 2px;
+      pointer-events: none;
+      border-radius: 999px;
+      background: linear-gradient(90deg, transparent, rgba(38, 215, 194, 0.46), rgba(125, 211, 252, 0.34), transparent);
+      box-shadow: 0 0 18px rgba(38, 215, 194, 0.13);
+      opacity: 0;
+      animation: sectionSignalPacket 10.5s ease-in-out infinite;
+    }
+    main section:nth-of-type(2n) > .wrap::before { animation-delay: -4s; }
+    main section:nth-of-type(3n) > .wrap::before { animation-delay: -8s; }
+    main section:nth-of-type(2n) > .wrap::after { animation-delay: 2.5s; }
+    main section:nth-of-type(3n) > .wrap::after { animation-delay: 5s; }
     .wrap {
       width: min(var(--max), calc(100% - 32px));
       margin: 0 auto;
+      position: relative;
+      z-index: 1;
     }
     .section-head {
       max-width: 100%;
@@ -301,6 +724,88 @@
       background: var(--panel);
       padding: 24px;
       box-shadow: var(--shadow);
+    }
+    .impact-board,
+    .case,
+    .role,
+    .project,
+    .stack-group,
+    .cert,
+    .metric,
+    .contact-box {
+      position: relative;
+      overflow: hidden;
+    }
+    .signal::before,
+    .impact-board::before,
+    .case::before,
+    .role::before,
+    .project::before,
+    .stack-group::before,
+    .cert::before,
+    .metric::before,
+    .contact-box::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(100deg, transparent 0%, rgba(125, 211, 252, 0.09) 45%, transparent 70%);
+      transform: translateX(-115%);
+      animation: autoSignalSweep 9.6s ease-in-out infinite;
+    }
+    .signal::before {
+      background: linear-gradient(100deg, transparent 0%, rgba(38, 215, 194, 0.13) 45%, transparent 70%);
+    }
+    .signal:nth-child(2),
+    .signal:nth-child(2)::before { animation-delay: 2.4s; }
+    .signal:nth-child(3),
+    .signal:nth-child(3)::before { animation-delay: 4.8s; }
+    .signal:nth-child(4),
+    .signal:nth-child(4)::before { animation-delay: 7.2s; }
+    .impact-board:hover::before,
+    .case:hover::before,
+    .role:hover::before,
+    .project:hover::before,
+    .stack-group:hover::before,
+    .cert:hover::before,
+    .metric:hover::before,
+    .contact-box:hover::before {
+      animation: signalSweep 0.9s ease;
+    }
+    .impact-board:nth-child(2)::before,
+    .metric:nth-child(2)::before,
+    .case:nth-child(2)::before,
+    .role:nth-child(2)::before,
+    .project:nth-child(2)::before,
+    .stack-group:nth-child(2)::before,
+    .cert:nth-child(2)::before { animation-delay: 1.6s; }
+    .case:nth-child(3)::before,
+    .metric:nth-child(3)::before,
+    .role:nth-child(3)::before,
+    .project:nth-child(3)::before,
+    .stack-group:nth-child(3)::before,
+    .cert:nth-child(3)::before { animation-delay: 3.2s; }
+    .project:nth-child(4)::before,
+    .metric:nth-child(4)::before,
+    .stack-group:nth-child(4)::before,
+    .cert:nth-child(4)::before { animation-delay: 4.8s; }
+    .stack-group:nth-child(5)::before { animation-delay: 6.4s; }
+    .stack-group:nth-child(6)::before { animation-delay: 8s; }
+    #projects .project::before,
+    #stack .stack-group::before,
+    #certs .cert::before,
+    #contact .contact-box::before {
+      animation: calmSignalSweep 20s ease-in-out infinite;
+    }
+    #projects .project:hover::before,
+    #stack .stack-group:hover::before,
+    #certs .cert:hover::before,
+    #contact .contact-box:hover::before {
+      opacity: 1;
+      animation: signalSweep 0.9s ease;
+    }
+    main section:is(#projects, #stack, #certs, #contact)::after {
+      opacity: 0.58;
     }
     .impact-board h3,
     .case h3,
@@ -353,6 +858,7 @@
       color: var(--cyan);
       line-height: 1;
       margin-bottom: 8px;
+      animation: metricGlow 5s ease-in-out infinite;
     }
     .metric span {
       color: var(--muted);
@@ -394,6 +900,12 @@
       padding: 6px 9px;
       font-size: 12px;
       font-weight: 750;
+    }
+    .tags span:hover {
+      transform: translateY(-2px);
+      border-color: rgba(38, 215, 194, 0.5);
+      background: rgba(38, 215, 194, 0.1);
+      color: #dbfffb;
     }
 
     .timeline {
@@ -449,40 +961,235 @@
     .architecture {
       border: 1px solid var(--line);
       border-radius: 8px;
-      background: #0b1719;
+      background:
+        radial-gradient(circle at 50% 34%, rgba(38, 215, 194, 0.08), transparent 34%),
+        #0b1719;
       padding: 46px 22px 22px;
       overflow: hidden;
     }
-    .arch-map {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 14px;
-      margin-top: 18px;
+    .platform-diagram {
       position: relative;
+      display: grid;
+      grid-template-columns: 1fr 1.12fr 1fr;
+      gap: 18px;
+      align-items: stretch;
+      margin-top: 24px;
+      isolation: isolate;
     }
-    .arch-column {
+    .platform-diagram::before,
+    .platform-diagram::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      height: 2px;
+      pointer-events: none;
+      background: linear-gradient(90deg, transparent, rgba(38, 215, 194, 0.56), transparent);
+      box-shadow: 0 0 18px rgba(38, 215, 194, 0.16);
+      animation: flowLine 4.8s ease-in-out infinite;
+    }
+    .platform-diagram::before {
+      left: 30%;
+      width: 15%;
+    }
+    .platform-diagram::after {
+      right: 30%;
+      width: 15%;
+      animation-delay: 1.2s;
+    }
+    .diagram-stage {
+      position: relative;
       border: 1px solid var(--line);
       border-radius: 8px;
+      background: rgba(255, 255, 255, 0.032);
       padding: 18px;
-      background: rgba(255,255,255,0.035);
-      min-height: 260px;
+      min-height: 360px;
+      overflow: hidden;
+      transition: transform 0.28s ease, border-color 0.28s ease, background-color 0.28s ease;
+      animation: diagramStageLive 8.4s ease-in-out infinite;
     }
-    .arch-column h3 {
+    .diagram-stage[data-stage="02"] { animation-delay: 1.4s; }
+    .diagram-stage[data-stage="03"] { animation-delay: 2.8s; }
+    .diagram-stage:hover,
+    .diagram-stage:focus,
+    .diagram-stage:focus-within {
+      transform: translateY(-3px);
+      border-color: rgba(38, 215, 194, 0.42);
+      background-color: rgba(38, 215, 194, 0.055);
+      outline: none;
+    }
+    .diagram-stage::before {
+      content: attr(data-stage);
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      color: rgba(125, 211, 252, 0.13);
+      font-size: 54px;
+      font-weight: 950;
+      line-height: 1;
+      pointer-events: none;
+    }
+    .diagram-stage h3 {
       margin: 0 0 14px;
       color: var(--cyan);
       font-size: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
     }
-    .arch-node {
-      border: 1px solid rgba(38, 215, 194, 0.28);
+    .diagram-lane {
+      display: grid;
+      gap: 10px;
+    }
+    .diagram-node {
+      position: relative;
+      border: 1px solid rgba(38, 215, 194, 0.22);
       border-radius: 8px;
-      padding: 11px 12px;
-      margin-top: 10px;
+      background: rgba(8, 17, 18, 0.62);
+      padding: 12px 12px 12px 36px;
       color: #dbf7f3;
-      background: rgba(38, 215, 194, 0.07);
       font-size: 13px;
-      font-weight: 750;
+      font-weight: 780;
+      transition: transform 0.24s ease, border-color 0.24s ease, background-color 0.24s ease;
     }
-
+    .diagram-node:hover,
+    .diagram-node:focus-visible {
+      transform: translateX(3px);
+      border-color: rgba(125, 211, 252, 0.38);
+      background-color: rgba(125, 211, 252, 0.08);
+      outline: none;
+    }
+    .diagram-node::before {
+      content: "";
+      position: absolute;
+      left: 13px;
+      top: 50%;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--teal);
+      box-shadow: 0 0 16px rgba(38, 215, 194, 0.62);
+      transform: translateY(-50%);
+      animation: diagramNodeLive 4.2s ease-in-out infinite;
+    }
+    .diagram-center {
+      border-color: rgba(38, 215, 194, 0.3);
+      background:
+        radial-gradient(circle at 50% 46%, rgba(38, 215, 194, 0.13), transparent 42%),
+        rgba(14, 27, 29, 0.76);
+    }
+    .cluster-ring {
+      min-height: 198px;
+      position: relative;
+      display: grid;
+      place-items: center;
+      margin: 8px 0 14px;
+      border: 1px dashed rgba(125, 211, 252, 0.2);
+      border-radius: 8px;
+      background:
+        radial-gradient(circle, rgba(38, 215, 194, 0.14) 0 18%, transparent 19% 100%),
+        linear-gradient(90deg, transparent 49%, rgba(125, 211, 252, 0.12) 50%, transparent 51%),
+        linear-gradient(0deg, transparent 49%, rgba(125, 211, 252, 0.12) 50%, transparent 51%);
+    }
+    .cluster-ring::before,
+    .cluster-ring::after {
+      content: "";
+      position: absolute;
+      inset: 28px;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .cluster-ring::before {
+      border: 1px solid rgba(38, 215, 194, 0.26);
+      border-top-color: rgba(38, 215, 194, 0.76);
+      border-right-color: rgba(125, 211, 252, 0.38);
+      animation: orbitSpin 18s linear infinite;
+    }
+    .cluster-ring::after {
+      inset: 54px;
+      border: 1px dashed rgba(125, 211, 252, 0.24);
+      animation: orbitPulse 4.8s ease-in-out infinite;
+    }
+    .cluster-core {
+      width: 104px;
+      height: 104px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      border: 1px solid rgba(38, 215, 194, 0.48);
+      color: var(--teal);
+      background: rgba(8, 17, 18, 0.74);
+      box-shadow: 0 0 34px rgba(38, 215, 194, 0.12);
+      font-weight: 950;
+      line-height: 1.1;
+      animation: diagramCoreLive 4.8s ease-in-out infinite;
+    }
+    .cluster-sat {
+      position: absolute;
+      min-width: 70px;
+      padding: 6px 8px;
+      border: 1px solid rgba(125, 211, 252, 0.24);
+      border-radius: 8px;
+      color: #bfeaff;
+      background: rgba(125, 211, 252, 0.08);
+      font-size: 11px;
+      font-weight: 850;
+      text-align: center;
+      animation: satSignal 6.4s ease-in-out infinite;
+    }
+    .cluster-sat.one { top: 20px; left: 22px; }
+    .cluster-sat.two { top: 20px; right: 22px; animation-delay: 1.6s; }
+    .cluster-sat.three { bottom: 20px; left: 22px; animation-delay: 3.2s; }
+    .cluster-sat.four { bottom: 20px; right: 22px; animation-delay: 4.8s; }
+    .diagram-flow {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .diagram-flow span {
+      position: absolute;
+      top: 50%;
+      left: 29%;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--teal);
+      box-shadow: 0 0 20px rgba(38, 215, 194, 0.6);
+      opacity: 0;
+      --travel: 250px;
+      animation: diagramPacket 5.8s linear infinite;
+    }
+    .diagram-flow span:nth-child(2) {
+      left: 47%;
+      --travel: 285px;
+      animation-delay: 1.9s;
+    }
+    .diagram-flow span:nth-child(3) {
+      left: 29%;
+      top: 58%;
+      --travel: 535px;
+      animation-delay: 3.8s;
+    }
+    .diagram-flow span:nth-child(4) {
+      left: 18%;
+      top: 36%;
+      --travel: 720px;
+      animation-delay: 4.8s;
+      background: var(--cyan);
+    }
+    .diagram-flow span:nth-child(5) {
+      left: 50%;
+      top: 64%;
+      --travel: 285px;
+      animation-delay: 6.2s;
+      background: var(--amber);
+      box-shadow: 0 0 18px rgba(245, 184, 75, 0.48);
+    }
+    .diagram-caption {
+      margin: 14px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
     .cert-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -500,7 +1207,6 @@
     }
 
     .contact {
-      background: #071011;
       border-bottom: 0;
     }
     .contact-box {
@@ -538,6 +1244,10 @@
       font-size: 14px;
     }
 
+    main section:is(#projects, #stack, #certs, #contact)::after {
+      opacity: 0.5;
+    }
+
     @media (max-width: 920px) {
       .nav-inner { align-items: flex-start; padding: 14px 0; flex-direction: column; }
       .nav-links { flex-wrap: wrap; gap: 10px 14px; }
@@ -552,7 +1262,26 @@
       .project-grid,
       .contact-box,
       .role { grid-template-columns: 1fr; }
-      .arch-map { grid-template-columns: 1fr; }
+      .platform-diagram {
+        grid-template-columns: 1fr;
+      }
+      .platform-diagram::before,
+      .platform-diagram::after,
+      .diagram-flow {
+        display: none;
+      }
+      .diagram-stage {
+        min-height: auto;
+      }
+      main section::before {
+        max-width: 88%;
+        font-size: clamp(42px, 12vw, 82px);
+        white-space: normal;
+      }
+      main section::after {
+        width: 46vw;
+        opacity: 0.65;
+      }
     }
 
     @media (max-width: 560px) {
@@ -562,6 +1291,13 @@
         background:
           linear-gradient(180deg, rgba(8,17,18,0.94), rgba(8,17,18,0.86)),
           url("assets/platform-hero-v2.png") center right / cover no-repeat;
+        background:
+          linear-gradient(180deg, rgba(8,17,18,0.94), rgba(8,17,18,0.86)),
+          image-set(
+            url("assets/platform-hero-v2.avif") type("image/avif"),
+            url("assets/platform-hero-v2.webp") type("image/webp"),
+            url("assets/platform-hero-v2.png") type("image/png")
+          ) center right / cover no-repeat;
       }
       h1 { font-size: clamp(48px, 16vw, 72px); }
       h2 { font-size: clamp(32px, 11vw, 46px); }
@@ -573,11 +1309,22 @@
       .cert-grid,
       .before-after { grid-template-columns: 1fr; }
       main section { padding: 62px 0; }
+      main section::before {
+        top: 20px;
+        right: 16px;
+        max-width: 90%;
+        font-size: clamp(36px, 15vw, 58px);
+        opacity: 0.22;
+      }
+      main section::after {
+        display: none;
+      }
       .contact-box { padding: 20px; }
     }
   </style>
 </head>
 <body>
+  <div class="scroll-progress" aria-hidden="true"></div>
   <a href="#main" class="skip-link">Skip to content</a>
 
   <nav class="nav" aria-label="Primary navigation">
@@ -599,24 +1346,24 @@
 
   <header class="hero">
     <div class="hero-inner">
-      <div class="eyebrow">Senior Cloud DevOps Engineer</div>
-      <h1>Ahmed ElMahdy</h1>
-      <p class="hero-copy">
+      <div class="eyebrow hero-animate hero-delay-1">Senior Cloud DevOps Engineer</div>
+      <h1 class="hero-animate hero-delay-2">Ahmed ElMahdy</h1>
+      <p class="hero-copy hero-animate hero-delay-3">
         I stabilize inherited platforms and turn them into secure, automated, observable production systems across Azure, AKS, Terraform, GitHub Actions, APIM, Key Vault, and Kubernetes delivery.
       </p>
-      <div class="hero-actions">
+      <div class="hero-actions hero-animate hero-delay-4">
         <a class="btn primary" href="mailto:a.elmahdy.mail@gmail.com">Contact Ahmed</a>
         <a class="btn" href="https://github.com/ahmed-el-mahdy" target="_blank" rel="noopener">GitHub</a>
         <a class="btn" href="https://linkedin.com/in/ahmed-el-mahdy-007" target="_blank" rel="noopener">LinkedIn</a>
         <a class="btn" href="Ahmed-Elmahdy-CV-DevOps.pdf">Download CV</a>
       </div>
-      <div class="signal-row" aria-label="Career highlights">
+      <div class="signal-row hero-animate hero-delay-5" aria-label="Career highlights">
         <div class="signal"><strong>5+</strong><span>years cloud and DevOps delivery</span></div>
         <div class="signal"><strong>24</strong><span>HPA policies across services and environments</span></div>
         <div class="signal"><strong>0</strong><span>staging Terraform drift after alignment</span></div>
         <div class="signal"><strong>10+</strong><span>repositories standardized for CI/CD</span></div>
       </div>
-      <div class="scope-row" aria-label="Platform scope">
+      <div class="scope-row hero-animate hero-delay-6" aria-label="Platform scope">
         <div class="scope-item"><strong>4</strong><span>AKS clusters</span></div>
         <div class="scope-item"><strong>7</strong><span>microservices</span></div>
         <div class="scope-item"><strong>3+</strong><span>certifications</span></div>
@@ -625,9 +1372,9 @@
   </header>
 
   <main id="main">
-    <section id="impact">
+    <section id="impact" data-watermark="AKS + Terraform">
       <div class="wrap">
-        <div class="section-head">
+        <div class="section-head reveal">
           <div>
             <div class="kicker">Platform transformation</div>
             <h2>From fragile delivery to controlled<br>production operations.</h2>
@@ -638,7 +1385,7 @@
         </div>
 
         <div class="impact-grid">
-          <div class="impact-board">
+          <div class="impact-board reveal">
             <h3>Mosadad recovery platform</h3>
             <p>
               Azure platform with 4 AKS environments, 7 microservices, APIM, App Gateway, WAF, Key Vault, Redis, MongoDB, Application Insights, Grafana, Prometheus, GitHub Actions, and Terraform.
@@ -663,7 +1410,7 @@
             </div>
           </div>
 
-          <div class="impact-board">
+          <div class="impact-board reveal">
             <h3>Measured outcomes</h3>
             <div class="metrics">
               <div class="metric"><strong>4</strong><span>AKS environments stabilized</span></div>
@@ -676,9 +1423,9 @@
       </div>
     </section>
 
-    <section id="casework">
+    <section id="casework" data-watermark="CI/CD + Security">
       <div class="wrap">
-        <div class="section-head">
+        <div class="section-head reveal">
           <div>
             <div class="kicker">Casework</div>
             <h2>Evidence that maps to senior DevOps<br>responsibilities.</h2>
@@ -689,17 +1436,17 @@
         </div>
 
         <div class="case-grid">
-          <article class="case">
+          <article class="case reveal">
             <h3>Secure delivery foundation</h3>
             <p>Migrated secret handling toward Key Vault CSI, standardized environment variables, and added deployment guardrails to prevent cross-environment mistakes.</p>
             <div class="tags"><span>Key Vault</span><span>CSI</span><span>GitHub Environments</span><span>APIM</span></div>
           </article>
-          <article class="case">
+          <article class="case reveal">
             <h3>Kubernetes reliability</h3>
             <p>Implemented HPA coverage, upgraded AKS capacity, tuned resources, fixed probes and service routing, and improved workload consistency across environments.</p>
             <div class="tags"><span>AKS</span><span>HPA</span><span>Kustomize</span><span>Ingress</span></div>
           </article>
-          <article class="case">
+          <article class="case reveal">
             <h3>Operational visibility</h3>
             <p>Built monitoring and reporting around Application Insights, Grafana, Prometheus, availability tests, alert rules, and performance assessments.</p>
             <div class="tags"><span>Grafana</span><span>Prometheus</span><span>App Insights</span><span>KQL</span></div>
@@ -708,9 +1455,9 @@
       </div>
     </section>
 
-    <section id="experience">
+    <section id="experience" data-watermark="Cloud Ops">
       <div class="wrap">
-        <div class="section-head">
+        <div class="section-head reveal">
           <div>
             <div class="kicker">Experience</div>
             <h2>Cloud, platform, automation, and<br>infrastructure operations.</h2>
@@ -721,7 +1468,7 @@
         </div>
 
         <div class="timeline">
-          <article class="role">
+          <article class="role reveal">
             <div class="role-meta"><b>Jan 2026 - Present</b>Julfar Consultancy Services</div>
             <div>
               <h3>Platform / DevOps Engineer</h3>
@@ -729,7 +1476,7 @@
               <div class="tags"><span>Azure</span><span>Terraform</span><span>AKS</span><span>Helm</span><span>Argo CD</span><span>GitHub Actions</span></div>
             </div>
           </article>
-          <article class="role">
+          <article class="role reveal">
             <div class="role-meta"><b>Jan 2026 - Present</b>Mosadad Recovery Claims</div>
             <div>
               <h3>Cloud & DevOps Engineer</h3>
@@ -737,7 +1484,7 @@
               <div class="tags"><span>Kustomize</span><span>.NET 8</span><span>Angular 19</span><span>MongoDB</span><span>Redis</span></div>
             </div>
           </article>
-          <article class="role">
+          <article class="role reveal">
             <div class="role-meta"><b>Oct 2021 - Dec 2025</b>Julfar Consultancy Services</div>
             <div>
               <h3>System Administrator</h3>
@@ -749,9 +1496,9 @@
       </div>
     </section>
 
-    <section id="projects">
+    <section id="projects" data-watermark="GitOps">
       <div class="wrap">
-        <div class="section-head">
+        <div class="section-head reveal">
           <div>
             <div class="kicker">Projects</div>
             <h2>Proof-of-work beyond job titles.</h2>
@@ -762,38 +1509,38 @@
         </div>
 
         <div class="project-grid">
-          <article class="project">
+          <article class="project reveal">
             <h3>Azure AKS platform showcase</h3>
             <p>Terraform modules for AKS, VNet, Key Vault, ACR, and API Management patterns.</p>
             <div class="tags"><span>Terraform</span><span>AKS</span><span>Key Vault</span><span>APIM</span></div>
-            <a class="project-link" href="../github-showcase/azure-aks-platform/README.md">Open local README</a>
+            <a class="project-link" href="https://github.com/ahmed-el-mahdy/azure-aks-platform" target="_blank" rel="noopener">View GitHub README</a>
           </article>
-          <article class="project">
+          <article class="project reveal">
             <h3>Argo CD and Helm deployments</h3>
             <p>ApplicationSet, app-of-apps, environment values, and Helm microservice chart structure.</p>
             <div class="tags"><span>Argo CD</span><span>Helm</span><span>GitOps</span><span>Kubernetes</span></div>
-            <a class="project-link" href="../github-showcase/argocd-helm-deployments/README.md">Open local README</a>
+            <a class="project-link" href="https://github.com/ahmed-el-mahdy/argocd-helm-deployments" target="_blank" rel="noopener">View GitHub README</a>
           </article>
-          <article class="project">
+          <article class="project reveal">
             <h3>Reusable GitHub Actions workflows</h3>
             <p>Build, test, container publish, AKS deploy, and APIM import workflow templates.</p>
             <div class="tags"><span>GitHub Actions</span><span>ACR</span><span>AKS</span><span>CI/CD</span></div>
-            <a class="project-link" href="../github-showcase/github-actions-reusable-workflows/README.md">Open local README</a>
+            <a class="project-link" href="https://github.com/ahmed-el-mahdy/github-actions-reusable-workflows" target="_blank" rel="noopener">View GitHub README</a>
           </article>
-          <article class="project">
+          <article class="project reveal">
             <h3>Kustomize multi-environment Kubernetes</h3>
             <p>Base and overlay structure for dev and prod with service-specific deployment manifests.</p>
             <div class="tags"><span>Kustomize</span><span>Overlays</span><span>Namespaces</span><span>Resources</span></div>
-            <a class="project-link" href="../github-showcase/kustomize-multi-env-k8s/README.md">Open local README</a>
+            <a class="project-link" href="https://github.com/ahmed-el-mahdy/kustomize-multi-env-k8s" target="_blank" rel="noopener">View GitHub README</a>
           </article>
         </div>
       </div>
     </section>
 
-    <section id="architecture">
+    <section id="architecture" data-watermark="Control Plane">
       <div class="wrap">
-        <div class="architecture">
-          <div class="section-head">
+        <div class="architecture reveal">
+          <div class="section-head reveal">
             <div>
               <div class="kicker">Operating model</div>
               <h2>Simple control plane view.</h2>
@@ -802,36 +1549,61 @@
               A portfolio page does not need every diagram inline. It needs one clear view that proves the platform engineering thinking behind the work.
             </p>
           </div>
-          <div class="arch-map" aria-label="Platform operating model">
-            <div class="arch-column">
-              <h3>Delivery</h3>
-              <div class="arch-node">GitHub Actions</div>
-              <div class="arch-node">Branch and environment guardrails</div>
-              <div class="arch-node">Docker build and ACR push</div>
-              <div class="arch-node">APIM import automation</div>
+          <div class="platform-diagram" aria-label="Platform architecture diagram">
+            <div class="diagram-flow" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+              <span></span>
+              <span></span>
             </div>
-            <div class="arch-column">
-              <h3>Runtime</h3>
-              <div class="arch-node">AKS clusters by environment</div>
-              <div class="arch-node">Kustomize overlays</div>
-              <div class="arch-node">NGINX ingress and APIM</div>
-              <div class="arch-node">HPA and cluster autoscaler</div>
+            <div class="diagram-stage reveal" data-stage="01" tabindex="0">
+              <h3>Delivery plane</h3>
+              <div class="diagram-lane">
+                <div class="diagram-node">GitHub repos and protected branches</div>
+                <div class="diagram-node">Reusable GitHub Actions workflows</div>
+                <div class="diagram-node">Build, test, scan, Docker push</div>
+                <div class="diagram-node">ACR image promotion by environment</div>
+                <div class="diagram-node">APIM import after deployment</div>
+              </div>
+              <p class="diagram-caption">Reusable workflow architecture reduces duplicated CI/CD logic across microservice repositories.</p>
             </div>
-            <div class="arch-column">
-              <h3>Operations</h3>
-              <div class="arch-node">Terraform alignment</div>
-              <div class="arch-node">Key Vault CSI secrets</div>
-              <div class="arch-node">App Insights, Grafana, Prometheus</div>
-              <div class="arch-node">WAF, Firewall, Bastion, RBAC</div>
+
+            <div class="diagram-stage diagram-center reveal" data-stage="02" tabindex="0">
+              <h3>Runtime platform</h3>
+              <div class="cluster-ring" aria-label="AKS runtime platform">
+                <div class="cluster-core">AKS<br>Platform</div>
+                <div class="cluster-sat one">Ingress</div>
+                <div class="cluster-sat two">HPA</div>
+                <div class="cluster-sat three">Helm</div>
+                <div class="cluster-sat four">Kustomize</div>
+              </div>
+              <div class="diagram-lane">
+                <div class="diagram-node">4 environments: dev, QA, staging, prod</div>
+                <div class="diagram-node">7 microservices with environment overlays</div>
+                <div class="diagram-node">GitOps path with Argo CD and Helm charts</div>
+              </div>
+            </div>
+
+            <div class="diagram-stage reveal" data-stage="03" tabindex="0">
+              <h3>Control and operations</h3>
+              <div class="diagram-lane">
+                <div class="diagram-node">Terraform modules for AKS, VNet, APIM, ACR</div>
+                <div class="diagram-node">Key Vault CSI and Entra RBAC</div>
+                <div class="diagram-node">WAF, Firewall, Bastion, NSG segmentation</div>
+                <div class="diagram-node">App Insights, Prometheus, Grafana</div>
+                <div class="diagram-node">Drift review, alerts, and rollout guardrails</div>
+              </div>
+              <p class="diagram-caption">Infrastructure, secrets, security, and observability stay close to the delivery path.</p>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <section id="stack">
+    <section id="stack" data-watermark="Platform Stack">
       <div class="wrap">
-        <div class="section-head">
+        <div class="section-head reveal">
           <div>
             <div class="kicker">Technical stack</div>
             <h2>Platform tools mapped to real operational work.</h2>
@@ -842,27 +1614,27 @@
         </div>
 
         <div class="stack-grid">
-          <div class="stack-group">
+          <div class="stack-group reveal">
             <h3>Cloud and IaC</h3>
             <div class="tags"><span>Azure</span><span>AWS</span><span>Terraform</span><span>CloudFormation</span><span>APIM</span><span>Key Vault</span></div>
           </div>
-          <div class="stack-group">
+          <div class="stack-group reveal">
             <h3>Kubernetes</h3>
             <div class="tags"><span>AKS</span><span>Docker</span><span>Helm</span><span>Kustomize</span><span>Argo CD</span><span>Ingress</span></div>
           </div>
-          <div class="stack-group">
+          <div class="stack-group reveal">
             <h3>Delivery</h3>
             <div class="tags"><span>GitHub Actions</span><span>Jenkins</span><span>CircleCI</span><span>GitLab CI</span><span>Ansible</span><span>YAML</span></div>
           </div>
-          <div class="stack-group">
+          <div class="stack-group reveal">
             <h3>Observability</h3>
             <div class="tags"><span>Prometheus</span><span>Grafana</span><span>Application Insights</span><span>Azure Monitor</span><span>CloudWatch</span></div>
           </div>
-          <div class="stack-group">
+          <div class="stack-group reveal">
             <h3>Security and identity</h3>
             <div class="tags"><span>Entra ID</span><span>RBAC</span><span>WAF</span><span>Firewall</span><span>B2C</span><span>IAM</span></div>
           </div>
-          <div class="stack-group">
+          <div class="stack-group reveal">
             <h3>Systems and code</h3>
             <div class="tags"><span>Linux</span><span>Windows Server</span><span>Bash</span><span>Python</span><span>.NET</span><span>Angular</span></div>
           </div>
@@ -870,9 +1642,9 @@
       </div>
     </section>
 
-    <section id="certs">
+    <section id="certs" data-watermark="Credentials">
       <div class="wrap">
-        <div class="section-head">
+        <div class="section-head reveal">
           <div>
             <div class="kicker">Credentials</div>
             <h2>Certifications and exam-ready tracks.</h2>
@@ -882,17 +1654,17 @@
           </p>
         </div>
         <div class="cert-grid">
-          <div class="cert"><strong>AWS Solutions Architect Associate</strong><span>AWS, 2025 to Sep 2028</span></div>
-          <div class="cert"><strong>AWS Cloud Practitioner</strong><span>AWS, 2025 to Sep 2028</span></div>
-          <div class="cert"><strong>Microsoft SC-300</strong><span>Identity and Access Administrator</span></div>
-          <div class="cert"><strong>CKA and AZ-104 ready</strong><span>KodeKloud and Manara training</span></div>
+          <div class="cert reveal"><strong>AWS Solutions Architect Associate</strong><span>AWS, 2025 to Sep 2028</span></div>
+          <div class="cert reveal"><strong>AWS Cloud Practitioner</strong><span>AWS, 2025 to Sep 2028</span></div>
+          <div class="cert reveal"><strong>Microsoft SC-300</strong><span>Identity and Access Administrator</span></div>
+          <div class="cert reveal"><strong>CKA and AZ-104 ready</strong><span>KodeKloud and Manara training</span></div>
         </div>
       </div>
     </section>
 
-    <section class="contact" id="contact">
+    <section class="contact" id="contact" data-watermark="Build">
       <div class="wrap">
-        <div class="contact-box">
+        <div class="contact-box reveal">
           <div>
             <h2>Open to Senior DevOps, Platform Engineer, and Cloud Architect roles.</h2>
             <p>Remote, UAE, KSA, or Egypt-based. Strongest fit: Azure platform engineering, Kubernetes delivery, CI/CD modernization, and production operations.</p>
@@ -911,5 +1683,44 @@
   <footer>
     <div class="wrap">Ahmed ElMahdy | Platform and DevOps Engineer | Built as portfolio-v2.html</div>
   </footer>
+  <script>
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const scrollProgress = document.querySelector('.scroll-progress');
+
+    const updateScrollProgress = () => {
+      const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = scrollable > 0 ? window.scrollY / scrollable : 0;
+      scrollProgress.style.transform = `scaleX(${Math.min(Math.max(progress, 0), 1)})`;
+    };
+
+    updateScrollProgress();
+    window.addEventListener('scroll', updateScrollProgress, { passive: true });
+    window.addEventListener('resize', updateScrollProgress);
+
+    if (prefersReducedMotion || !('IntersectionObserver' in window)) {
+      document.querySelectorAll('.reveal').forEach((element) => {
+        element.classList.add('visible');
+      });
+    } else {
+      document.querySelectorAll('section').forEach((section) => {
+        section.querySelectorAll('.reveal').forEach((element, index) => {
+          element.style.transitionDelay = `${Math.min(index * 70, 280)}ms`;
+        });
+      });
+
+      const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            revealObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+
+      document.querySelectorAll('.reveal').forEach((element) => {
+        revealObserver.observe(element);
+      });
+    }
+  </script>
 </body>
 </html>
