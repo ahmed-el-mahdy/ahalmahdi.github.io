@@ -174,10 +174,75 @@
       z-index: -1;
       background: linear-gradient(0deg, var(--bg), rgba(8,17,18,0));
     }
+    .hero-ops {
+      position: absolute;
+      inset: 68px 0 0;
+      z-index: -1;
+      pointer-events: none;
+      overflow: hidden;
+      opacity: 0.76;
+    }
+    .hero-ops::before {
+      content: "";
+      position: absolute;
+      inset: 0 5% 18%;
+      background:
+        linear-gradient(rgba(38, 215, 194, 0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(125, 211, 252, 0.052) 1px, transparent 1px),
+        radial-gradient(circle at 74% 28%, rgba(38, 215, 194, 0.22), transparent 18%),
+        radial-gradient(circle at 56% 58%, rgba(125, 211, 252, 0.14), transparent 20%);
+      background-size: 118px 118px, 118px 118px, 620px 380px, 540px 340px;
+      mask-image: linear-gradient(90deg, transparent 0, #000 40%, #000 100%);
+      animation: heroOpsDrift 18s ease-in-out infinite alternate;
+    }
+    .hero-ops::after {
+      content: "";
+      position: absolute;
+      right: 6%;
+      top: 17%;
+      width: min(620px, 45vw);
+      height: min(360px, 42vh);
+      border: 1px solid rgba(38, 215, 194, 0.16);
+      border-radius: 8px;
+      background:
+        linear-gradient(90deg, transparent 0 49%, rgba(38, 215, 194, 0.14) 49.5%, transparent 50.5% 100%),
+        linear-gradient(0deg, transparent 0 49%, rgba(125, 211, 252, 0.12) 49.5%, transparent 50.5% 100%),
+        radial-gradient(circle at 50% 50%, rgba(38, 215, 194, 0.16), transparent 25%);
+      box-shadow: inset 0 0 48px rgba(38, 215, 194, 0.06), 0 0 46px rgba(0, 0, 0, 0.18);
+      opacity: 0.72;
+      animation: heroOpsDrift 22s ease-in-out infinite alternate-reverse;
+    }
+    .hero-ops span {
+      position: absolute;
+      right: 9%;
+      width: min(540px, 42vw);
+      height: 2px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, transparent, rgba(38, 215, 194, 0.76), rgba(125, 211, 252, 0.52), transparent);
+      opacity: 0;
+      animation: heroOpsPacket 7.2s ease-in-out infinite;
+    }
+    .hero-ops span::before {
+      content: "";
+      position: absolute;
+      right: 18%;
+      top: 50%;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--teal);
+      transform: translateY(-50%);
+      animation: heroOpsPulse 3.6s ease-in-out infinite;
+    }
+    .hero-ops span:nth-child(1) { top: 26%; animation-delay: 0s; }
+    .hero-ops span:nth-child(2) { top: 42%; animation-delay: 2.4s; }
+    .hero-ops span:nth-child(3) { top: 58%; animation-delay: 4.8s; }
     .hero-inner {
       width: min(var(--max), calc(100% - 32px));
       margin: 0 auto;
       padding: 58px 0 52px;
+      position: relative;
+      z-index: 1;
     }
     .eyebrow {
       display: inline-flex;
@@ -492,6 +557,33 @@
         box-shadow: 0 0 18px rgba(38, 215, 194, 0.14);
       }
     }
+    @keyframes heroOpsDrift {
+      from { transform: translate3d(-12px, -8px, 0); }
+      to { transform: translate3d(12px, 8px, 0); }
+    }
+    @keyframes heroOpsPacket {
+      0%, 58%, 100% {
+        opacity: 0;
+        transform: translateX(-12%) scaleX(0.72);
+      }
+      12% {
+        opacity: 0.85;
+      }
+      28% {
+        opacity: 0;
+        transform: translateX(112%) scaleX(1);
+      }
+    }
+    @keyframes heroOpsPulse {
+      0%, 100% {
+        opacity: 0.42;
+        box-shadow: 0 0 0 rgba(38, 215, 194, 0);
+      }
+      50% {
+        opacity: 1;
+        box-shadow: 0 0 20px rgba(38, 215, 194, 0.42);
+      }
+    }
 
     @keyframes heroRise {
       from {
@@ -538,6 +630,11 @@
       .metric strong,
       .signal,
       .signal::before,
+      .hero-ops,
+      .hero-ops::before,
+      .hero-ops::after,
+      .hero-ops span,
+      .hero-ops span::before,
       main section > .wrap::before,
       main section > .wrap::after,
       .diagram-flow span,
@@ -603,10 +700,11 @@
       mask-image: linear-gradient(90deg, transparent, #000 45%, #000 100%);
     }
     main section {
-      padding: 86px 0;
+      padding: 72px 0;
       border-bottom: 1px solid var(--line);
       position: relative;
       overflow: hidden;
+      scroll-margin-top: 84px;
       background:
         radial-gradient(circle at 26% 16%, rgba(38, 215, 194, 0.08), transparent 26%),
         radial-gradient(circle at 82% 68%, rgba(125, 211, 252, 0.065), transparent 25%),
@@ -648,7 +746,7 @@
     main section > .wrap::before {
       content: "";
       position: absolute;
-      inset: -34px -28px;
+      inset: -26px -24px;
       z-index: -1;
       pointer-events: none;
       border-radius: 8px;
@@ -688,7 +786,7 @@
     }
     .section-head {
       max-width: 100%;
-      margin: 0 0 42px;
+      margin: 0 0 36px;
       text-align: left;
     }
     .kicker {
@@ -707,7 +805,7 @@
     }
     .section-head p {
       max-width: 1100px;
-      margin: 18px 0 0;
+      margin: 14px 0 0;
       color: var(--muted);
       font-size: clamp(16px, 1.55vw, 20px);
       line-height: 1.65;
@@ -716,7 +814,8 @@
     .impact-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 18px;
+      gap: 16px;
+      margin-top: 12px;
     }
     .impact-board {
       border: 1px solid var(--line);
@@ -870,6 +969,7 @@
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 16px;
+      margin-top: 12px;
     }
     .case,
     .role,
@@ -911,6 +1011,7 @@
     .timeline {
       display: grid;
       gap: 14px;
+      margin-top: 12px;
     }
     .role {
       display: grid;
@@ -936,6 +1037,7 @@
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 14px;
+      margin-top: 12px;
     }
     .stack-group h3 {
       margin: 0 0 14px;
@@ -948,7 +1050,8 @@
     .project-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
+      gap: 14px;
+      margin-top: 12px;
     }
     .project-link {
       display: inline-flex;
@@ -971,7 +1074,7 @@
       position: relative;
       display: grid;
       grid-template-columns: 1fr 1.12fr 1fr;
-      gap: 18px;
+      gap: 14px;
       align-items: stretch;
       margin-top: 24px;
       isolation: isolate;
@@ -1192,8 +1295,27 @@
     }
     .cert-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 12px;
+      margin-top: 12px;
+    }
+    .cert {
+      min-height: 142px;
+    }
+    .cert.featured {
+      border-color: rgba(38, 215, 194, 0.34);
+      background:
+        radial-gradient(circle at 88% 18%, rgba(38, 215, 194, 0.12), transparent 28%),
+        var(--panel);
+    }
+    .cert-type {
+      display: inline-flex;
+      margin-bottom: 12px;
+      color: var(--amber);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
     }
     .cert strong {
       display: block;
@@ -1240,7 +1362,7 @@
     }
     footer {
       color: var(--muted);
-      padding: 28px 0;
+      padding: 22px 0;
       font-size: 14px;
     }
 
@@ -1285,8 +1407,47 @@
     }
 
     @media (max-width: 560px) {
+      body::before { background-size: 72px 72px; }
+      .nav-inner {
+        width: min(100% - 24px, var(--max));
+        gap: 10px;
+        padding: 12px 0;
+      }
+      .brand {
+        width: 100%;
+        justify-content: space-between;
+      }
+      .brand-mark {
+        width: 32px;
+        height: 32px;
+      }
+      .nav-links {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 7px;
+        font-size: 12px;
+      }
+      .nav-links a {
+        min-height: 32px;
+        display: grid;
+        place-items: center;
+        border: 1px solid rgba(238, 247, 246, 0.1);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.035);
+      }
+      .nav-links .nav-action {
+        padding: 0;
+        color: #061112;
+        background: var(--teal);
+        border-color: transparent;
+      }
       .hero { min-height: auto; }
-      .hero-inner { padding-top: 54px; }
+      .hero-inner {
+        width: min(100% - 24px, var(--max));
+        padding-top: 34px;
+        padding-bottom: 34px;
+      }
       .hero::before {
         background:
           linear-gradient(180deg, rgba(8,17,18,0.94), rgba(8,17,18,0.86)),
@@ -1299,16 +1460,72 @@
             url("assets/platform-hero-v2.png") type("image/png")
           ) center right / cover no-repeat;
       }
-      h1 { font-size: clamp(48px, 16vw, 72px); }
-      h2 { font-size: clamp(32px, 11vw, 46px); }
+      .hero-ops {
+        inset: 128px 0 0;
+        opacity: 0.42;
+      }
+      .hero-ops::after {
+        right: -18%;
+        width: 82vw;
+        height: 260px;
+      }
+      .hero-ops span {
+        right: -8%;
+        width: 86vw;
+      }
+      .eyebrow {
+        font-size: 11px;
+        margin-bottom: 16px;
+      }
+      h1 {
+        max-width: 100%;
+        font-size: clamp(40px, 12.4vw, 50px);
+        line-height: 1;
+      }
+      h2 { font-size: clamp(31px, 10.4vw, 44px); }
+      .hero-copy {
+        font-size: 17px;
+        line-height: 1.58;
+        margin-top: 18px;
+      }
+      .hero-actions {
+        margin-top: 22px;
+        gap: 10px;
+      }
+      .hero-actions .btn {
+        flex: 1 1 100%;
+        min-height: 44px;
+      }
       .signal-row,
-      .scope-row,
       .metrics,
       .case-grid,
       .stack-grid,
       .cert-grid,
       .before-after { grid-template-columns: 1fr; }
-      main section { padding: 62px 0; }
+      .signal-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        margin-top: 22px;
+      }
+      .scope-row {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+        margin-top: 16px;
+        padding-top: 16px;
+      }
+      main section { padding: 50px 0; }
+      main section { scroll-margin-top: 154px; }
+      main section > .wrap {
+        width: min(100% - 24px, var(--max));
+      }
+      main section > .wrap::before {
+        inset: -14px -10px;
+        opacity: 0.26;
+      }
+      main section > .wrap::after {
+        left: -16%;
+        right: -16%;
+      }
       main section::before {
         top: 20px;
         right: 16px;
@@ -1318,6 +1535,52 @@
       }
       main section::after {
         display: none;
+      }
+      .section-head {
+        margin-bottom: 26px;
+      }
+      .section-head p {
+        font-size: 16px;
+        line-height: 1.56;
+        margin-top: 12px;
+      }
+      .impact-board,
+      .case,
+      .role,
+      .project,
+      .stack-group,
+      .cert,
+      .contact-box {
+        padding: 16px;
+      }
+      .signal,
+      .scope-item,
+      .metric {
+        min-height: 78px;
+      }
+      .signal {
+        padding: 12px;
+      }
+      .signal strong {
+        font-size: 24px;
+      }
+      .signal span {
+        font-size: 12px;
+        line-height: 1.45;
+      }
+      .scope-item strong {
+        font-size: 28px;
+      }
+      .scope-item span {
+        font-size: 10px;
+        letter-spacing: 0.08em;
+      }
+      .cluster-ring {
+        min-height: 176px;
+      }
+      .cluster-sat {
+        min-width: 62px;
+        font-size: 10px;
       }
       .contact-box { padding: 20px; }
     }
@@ -1345,6 +1608,11 @@
   </nav>
 
   <header class="hero">
+    <div class="hero-ops" aria-hidden="true">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
     <div class="hero-inner">
       <div class="eyebrow hero-animate hero-delay-1">Senior Cloud DevOps Engineer</div>
       <h1 class="hero-animate hero-delay-2">Ahmed ElMahdy</h1>
@@ -1650,14 +1918,16 @@
             <h2>Certifications and exam-ready tracks.</h2>
           </div>
           <p>
-            Official certifications support the hands-on story, especially across AWS architecture, Microsoft identity, Kubernetes, and Azure administration.
+            Keep the technical credentials first, then add business and communication programs that strengthen senior stakeholder-facing platform work.
           </p>
         </div>
         <div class="cert-grid">
-          <div class="cert reveal"><strong>AWS Solutions Architect Associate</strong><span>AWS, 2025 to Sep 2028</span></div>
-          <div class="cert reveal"><strong>AWS Cloud Practitioner</strong><span>AWS, 2025 to Sep 2028</span></div>
-          <div class="cert reveal"><strong>Microsoft SC-300</strong><span>Identity and Access Administrator</span></div>
-          <div class="cert reveal"><strong>CKA and AZ-104 ready</strong><span>KodeKloud and Manara training</span></div>
+          <div class="cert featured reveal"><span class="cert-type">Cloud architecture</span><strong>AWS Solutions Architect Associate</strong><span>AWS, valid to Sep 2028</span></div>
+          <div class="cert featured reveal"><span class="cert-type">Cloud foundation</span><strong>AWS Cloud Practitioner</strong><span>AWS, valid to Sep 2028</span></div>
+          <div class="cert reveal"><span class="cert-type">Identity</span><strong>Microsoft SC-300</strong><span>Identity and Access Administrator</span></div>
+          <div class="cert reveal"><span class="cert-type">Platform track</span><strong>CKA and AZ-104 ready</strong><span>Kubernetes and Azure administration preparation</span></div>
+          <div class="cert reveal"><span class="cert-type">Professional development</span><strong>McKinsey.org Forward Program</strong><span>Problem solving, communication, adaptability, and digital collaboration</span></div>
+          <div class="cert reveal"><span class="cert-type">Infrastructure foundations</span><strong>VMware IT Academy concepts</strong><span>Cloud, network virtualization, and software-defined storage foundations</span></div>
         </div>
       </div>
     </section>
