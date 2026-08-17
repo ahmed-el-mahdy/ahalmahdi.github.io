@@ -5,6 +5,8 @@ const configured = cfg.SUPABASE_URL && !cfg.SUPABASE_URL.includes('YOUR_PROJECT'
 const $ = (id) => document.getElementById(id);
 const money = (n) => new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 }).format(Number(n || 0)) + ' ج';
 
+let supabase;
+
 function showApp(session) {
   $('auth').hidden = true;
   $('app').hidden = false;
@@ -14,7 +16,27 @@ function showApp(session) {
 function showAuth() { $('auth').hidden = false; $('app').hidden = true; }
 
 async function loadData(userId) {
-  const { data: settings } = await supabase.from('user_settings').select('*').eq('user_id', userId).maybeSingle();
+  const { data: settings, error } = await supabase.from('user_settings').select('*').eq('user_id', userId).maybeSingle();
+  if (error) {
+    $('privateState').textContent = 'قاعدة البيانات لم تُجهّز بعد. نفّذ supabase-schema.sql في Supabase SQL Editor.';
+    $('income').textContent = '—';
+    $('wealth').textContent = '—';
+    $('rate').textContent = '—';
+    return;
+  }
+  if (!settings) {
+    const { data: created, error: createError } = await supabase.from('user_settings').insert({ user_id: userId }).select().single();
+    if (createError) {
+      $('privateState').textContent = 'تعذر إنشاء إعدادات الحساب. تأكد من تشغيل schema وRLS.';
+      return;
+    }
+    renderSettings(created);
+    return;
+  }
+  renderSettings(settings);
+}
+
+function renderSettings(settings) {
   const income = Number(settings?.monthly_income || 0);
   const wealth = Number(settings?.core_wealth || 0);
   $('income').textContent = money(income);
@@ -23,9 +45,10 @@ async function loadData(userId) {
   $('privateState').textContent = 'بياناتك محمية بـ RLS ومتصلة بحسابك فقط';
 }
 
-let supabase;
 if (configured) {
-  supabase = createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
+  supabase = createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+  });
   supabase.auth.getSession().then(({ data: { session } }) => session ? showApp(session) : showAuth());
   supabase.auth.onAuthStateChange((_event, session) => session ? showApp(session) : showAuth());
 } else {
@@ -38,17 +61,23 @@ $('login').addEventListener('click', async () => {
   if (!supabase) return;
   const email = $('email').value.trim();
   const password = $('password').value;
+  if (!email || !password) { $('authMsg').textContent = 'أدخل البريد الإلكتروني وكلمة المرور.'; return; }
   $('authMsg').textContent = 'جاري تسجيل الدخول…';
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   $('authMsg').textContent = error ? error.message : 'تم الدخول.';
 });
+
 $('signup').addEventListener('click', async () => {
   if (!supabase) return;
   const email = $('email').value.trim();
   const password = $('password').value;
+  if (!email || !password) { $('authMsg').textContent = 'أدخل البريد الإلكتروني وكلمة المرور.'; return; }
   if (password.length < 12) { $('authMsg').textContent = 'استخدم كلمة مرور من 12 حرفًا على الأقل.'; return; }
   $('authMsg').textContent = 'جاري إنشاء الحساب…';
-  const { error } = await supabase.auth.signUp({ email, password });
-  $('authMsg').textContent = error ? error.message : 'تم إنشاء الحساب. تحقق من البريد الإلكتروني إذا كان تأكيد البريد مفعّلًا.';
+  const { data, error } = await supabase.auth.signUp({ email, password });
+  if (error) $('authMsg').textContent = error.message;
+  else if (!data.session) $('authMsg').textContent = 'تم إنشاء الحساب. افتح رسالة التأكيد في بريدك الإلكتروني ثم سجّل الدخول.';
+  else $('authMsg').textContent = 'تم إنشاء الحساب وتسجيل الدخول.';
 });
+
 $('logout').addEventListener('click', async () => { if (supabase) await supabase.auth.signOut(); });
