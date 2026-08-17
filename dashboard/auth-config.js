@@ -1,7 +1,7 @@
 /* Browser-safe Supabase configuration.
-   IMPORTANT: never put a Supabase service_role/secret key here.
-   Replace these placeholders after creating your private Supabase project. */
+   The publishable/anon key is intended for browser use.
+   NEVER put a Supabase secret/service_role key here. */
 window.AUTH_CONFIG = {
-  SUPABASE_URL: "https://YOUR_PROJECT.supabase.co",
-  SUPABASE_ANON_KEY: "YOUR_SUPABASE_PUBLISHABLE_OR_ANON_KEY"
+  SUPABASE_URL: "https://avzuxfpmvmynfxmwfxhk.supabase.co",
+  SUPABASE_ANON_KEY: "sb_publishable_tvHTpZIuTGSl0ajtbPOZkA_wNpj1m9h"
 };
