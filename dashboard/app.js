@@ -2,105 +2,64 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 const cfg = window.AUTH_CONFIG || {};
 const configured = cfg.SUPABASE_URL && !cfg.SUPABASE_URL.includes('YOUR_PROJECT') && cfg.SUPABASE_ANON_KEY && !cfg.SUPABASE_ANON_KEY.includes('YOUR_SUPABASE');
-const $ = (id) => document.getElementById(id);
-const money = (n) => new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 }).format(Number(n || 0)) + ' ج';
-const dashboardUrl = () => `${window.location.origin}${window.location.pathname}`;
+const $ = id => document.getElementById(id);
+const money = n => new Intl.NumberFormat('ar-EG',{maximumFractionDigits:0}).format(Number(n||0))+' ج';
+const monthNow = () => new Date().toISOString().slice(0,7);
+const escapeHtml = value => String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+let supabase, userId;
+let state = { settings:null, budget:[], investments:[], goals:[], mobility:[], career:[] };
 
-let supabase;
+function msg(el,text,type=''){ if(el){el.textContent=text;el.className='msg '+type;} }
+function showApp(session){ userId=session.user.id; $('auth').hidden=true; $('app').hidden=false; $('userEmail').textContent=session.user.email||'Authenticated user'; loadAll(); }
+function showAuth(){ $('auth').hidden=false; $('app').hidden=true; }
+function openPasswordModal(){ $('passwordModal').hidden=false; $('newPassword').value=''; $('confirmPassword').value=''; msg($('passwordMsg'),''); }
+function closePasswordModal(){ $('passwordModal').hidden=true; }
 
-function showApp(session) {
-  $('auth').hidden = true;
-  $('app').hidden = false;
-  $('userEmail').textContent = session.user.email || 'Authenticated user';
-  loadData(session.user.id);
+async function loadAll(){
+  $('privateState').textContent='جاري تحميل بياناتك الخاصة…';
+  const [settings,budget,investments,goals,mobility,career]=await Promise.all([
+    supabase.from('user_settings').select('*').eq('user_id',userId).maybeSingle(),
+    supabase.from('monthly_budget').select('*').eq('user_id',userId).eq('month',monthNow()+'-01').order('category'),
+    supabase.from('investment_positions').select('*').eq('user_id',userId).order('updated_at',{ascending:false}),
+    supabase.from('goals').select('*').eq('user_id',userId).order('id',{ascending:false}),
+    supabase.from('mobility_plans').select('*').eq('user_id',userId).order('id',{ascending:false}),
+    supabase.from('career_tasks').select('*').eq('user_id',userId).order('id',{ascending:false})
+  ]);
+  if(settings.error){ $('privateState').textContent='نفّذ supabase-migration-v2.sql بعد schema الأساسي ثم حدّث الصفحة.'; return; }
+  if(!settings.data){ const r=await supabase.from('user_settings').insert({user_id:userId}).select().single(); if(r.error){$('privateState').textContent='تعذر إنشاء إعدادات الحساب.';return;} state.settings=r.data; } else state.settings=settings.data;
+  state.budget=budget.data||[]; state.investments=investments.data||[]; state.goals=goals.data||[]; state.mobility=mobility.data||[]; state.career=career.data||[];
+  renderAll();
 }
-function showAuth() { $('auth').hidden = false; $('app').hidden = true; }
-function setMsg(el, text, type = '') { el.textContent = text; el.className = `msg ${type}`; }
-function openPasswordModal() { $('passwordModal').hidden = false; $('newPassword').value = ''; $('confirmPassword').value = ''; setMsg($('passwordMsg'), ''); }
-function closePasswordModal() { $('passwordModal').hidden = true; }
-
-async function loadData(userId) {
-  const { data: settings, error } = await supabase.from('user_settings').select('*').eq('user_id', userId).maybeSingle();
-  if (error) {
-    $('privateState').textContent = 'قاعدة البيانات لم تُجهّز بعد. نفّذ supabase-schema.sql في Supabase SQL Editor.';
-    $('income').textContent = '—'; $('wealth').textContent = '—'; $('rate').textContent = '—'; return;
-  }
-  if (!settings) {
-    const { data: created, error: createError } = await supabase.from('user_settings').insert({ user_id: userId }).select().single();
-    if (createError) { $('privateState').textContent = 'تعذر إنشاء إعدادات الحساب. تأكد من تشغيل schema وRLS.'; return; }
-    renderSettings(created); return;
-  }
-  renderSettings(settings);
+function renderAll(){ renderSettings(); renderOverview(); renderBudget(); renderInvestments(); renderMobility(); renderCareer(); renderGoals(); $('privateState').textContent='بياناتك محمية بـ RLS ومتصلة بحسابك فقط'; }
+function renderSettings(){ const s=state.settings||{}; $('settingIncome').value=s.monthly_income||''; $('settingInvestment').value=s.monthly_investment_target||''; $('settingEmergency').value=s.emergency_buffer_target||''; $('settingNote').value=s.personal_note||''; }
+function renderOverview(){
+  const income=Number(state.settings?.monthly_income||0), target=Number(state.settings?.monthly_investment_target||0), expenses=state.budget.reduce((a,x)=>a+Number(x.amount||0),0), available=income-expenses;
+  const portfolio=state.investments.reduce((a,x)=>a+Number(x.market_value ?? x.cost_basis ?? 0),0);
+  $('income').textContent=money(income); $('investmentTarget').textContent=money(target); $('totalExpenses').textContent=money(expenses); $('available').textContent=money(available); $('portfolioValue').textContent=money(portfolio); $('goalCount').textContent=state.goals.filter(g=>g.status==='active').length; $('careerCount').textContent=state.career.filter(c=>c.status!=='done').length;
+  const pct=income?Math.min(100,(target/income)*100):0; $('savingsBar').style.width=pct+'%'; $('savingsLabel').textContent=income&&target?`هدف الاستثمار ${money(target)} من دخل ${money(income)} — ${pct.toFixed(1)}%`:'أدخل الدخل وهدف الاستثمار من الإعدادات.';
 }
+function renderBudget(){ $('budgetMonth').value=monthNow(); $('budgetMonthLabel').textContent=monthNow(); const rows=$('budgetRows'); if(!state.budget.length){rows.innerHTML='<tr><td colspan="5" class="empty">لا توجد بنود لهذا الشهر بعد.</td></tr>';return;} rows.innerHTML=state.budget.map(x=>`<tr><td>${escapeHtml(x.category)}</td><td>${money(x.amount)}</td><td>${escapeHtml(x.priority)}</td><td>${escapeHtml(x.notes||'')}</td><td><button data-delete-budget="${x.id}">حذف</button></td></tr>`).join(''); }
+function renderInvestments(){ const rows=$('investmentRows'); if(!state.investments.length){rows.innerHTML='<tr><td colspan="6" class="empty">أضف أول أصل استثماري من النموذج أعلاه.</td></tr>';return;} rows.innerHTML=state.investments.map(x=>{const cost=Number(x.cost_basis||0),value=Number(x.market_value ?? cost),pl=value-cost;return `<tr><td>${escapeHtml(x.asset)}</td><td>${escapeHtml(x.quantity)} ${escapeHtml(x.unit||'')}</td><td>${money(cost)}</td><td>${money(value)}</td><td class="${pl>=0?'ok':'danger'}">${money(pl)}</td><td><button data-delete-investment="${x.id}">حذف</button></td></tr>`}).join(''); }
+function renderMobility(){ const el=$('mobilityCards'); if(!state.mobility.length){el.innerHTML='<div class="card empty">لم تسجل بدائل تنقل بعد.</div>';return;} el.innerHTML=state.mobility.map(x=>{const gap=Math.max(0,Number(x.target_price||0)-Number(x.saved_amount||0));const months=Number(x.monthly_contribution||0)>0?Math.ceil(gap/Number(x.monthly_contribution)):null;return `<div class="card"><h3>${escapeHtml(x.option_name)}</h3><div class="label">${x.fuel_type==='electric'?'كهرباء':'بنزين'}</div><p>سعر الهدف: <b>${money(x.target_price)}</b><br>المدخر: <b>${money(x.saved_amount)}</b><br>الفجوة: <b class="warn">${money(gap)}</b><br>التشغيل الشهري: <b>${money(x.estimated_monthly_running_cost)}</b></p>${months?`<div class="notice">بالإضافة الشهرية الحالية: حوالي ${months} شهر للوصول للهدف.</div>`:''}<p class="muted small">${escapeHtml(x.notes||'')}</p><button data-delete-mobility="${x.id}">حذف</button></div>`}).join(''); }
+function renderCareer(){ const rows=$('careerRows'); if(!state.career.length){rows.innerHTML='<tr><td colspan="5" class="empty">أضف أول مهمة مهنية.</td></tr>';return;} rows.innerHTML=state.career.map(x=>`<tr><td>${escapeHtml(x.title)}</td><td>${escapeHtml(x.track)}</td><td>${escapeHtml(x.status)}</td><td>${escapeHtml(x.target_date||'—')}</td><td><button data-delete-career="${x.id}">حذف</button></td></tr>`).join(''); }
+function renderGoals(){ const el=$('goalCards'); if(!state.goals.length){el.innerHTML='<div class="card empty">أضف هدفًا عائليًا أو ماليًا.</div>';return;} el.innerHTML=state.goals.map(x=>{const target=Number(x.target_amount||0),saved=Number(x.saved_amount||0),pct=target?Math.min(100,saved/target*100):0;return `<div class="card"><h3>${escapeHtml(x.name)}</h3><div class="label">أولوية: ${escapeHtml(x.priority)} · ${escapeHtml(x.status)}</div><div class="value">${money(saved)} <span class="muted small">/ ${money(target)}</span></div><div class="progress"><i style="width:${pct}%"></i></div><div class="muted small" style="margin-top:6px">${pct.toFixed(0)}% مكتمل</div><p class="muted small">${escapeHtml(x.notes||'')}</p><button data-delete-goal="${x.id}">حذف</button></div>`}).join(''); }
 
-function renderSettings(settings) {
-  const income = Number(settings?.monthly_income || 0);
-  const wealth = Number(settings?.core_wealth || 0);
-  $('income').textContent = money(income);
-  $('wealth').textContent = money(wealth);
-  $('rate').textContent = income ? ((wealth / income) * 100).toFixed(1) + '%' : '—';
-  $('privateState').textContent = 'بياناتك محمية بـ RLS ومتصلة بحسابك فقط';
-}
+$('login').addEventListener('click',async()=>{const email=$('email').value.trim(),password=$('password').value;if(!email||!password){msg($('authMsg'),'أدخل البريد الإلكتروني وكلمة المرور.','error');return;}msg($('authMsg'),'جاري تسجيل الدخول…');const {error}=await supabase.auth.signInWithPassword({email,password});msg($('authMsg'),error?error.message:'تم الدخول.',error?'error':'success');});
+$('signup').addEventListener('click',async()=>{const email=$('email').value.trim(),password=$('password').value;if(!email||!password){msg($('authMsg'),'أدخل البريد الإلكتروني وكلمة المرور.','error');return;}if(password.length<12){msg($('authMsg'),'استخدم كلمة مرور من 12 حرفًا على الأقل.','error');return;}msg($('authMsg'),'جاري إنشاء الحساب…');const {data,error}=await supabase.auth.signUp({email,password});if(error)msg($('authMsg'),error.message,'error');else if(!data.session)msg($('authMsg'),'تم إنشاء الحساب. افحص بريدك ثم سجّل الدخول.','success');else msg($('authMsg'),'تم إنشاء الحساب وتسجيل الدخول.','success');});
+$('forgot').addEventListener('click',async()=>{const email=$('email').value.trim();if(!email){msg($('authMsg'),'أدخل بريدك الإلكتروني أولًا.','error');return;}msg($('authMsg'),'جاري إرسال رابط إعادة التعيين…');const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:window.location.href});msg($('authMsg'),error?error.message:'تم إرسال الرابط إلى بريدك الإلكتروني.',error?'error':'success');});
+$('logout').addEventListener('click',()=>supabase.auth.signOut()); $('changePassword').addEventListener('click',openPasswordModal); $('closePasswordModal').addEventListener('click',closePasswordModal); $('cancelPassword').addEventListener('click',closePasswordModal);
+$('savePassword').addEventListener('click',async()=>{const p=$('newPassword').value,c=$('confirmPassword').value;if(p.length<12){msg($('passwordMsg'),'استخدم 12 حرفًا على الأقل.','error');return;}if(p!==c){msg($('passwordMsg'),'كلمتا المرور غير متطابقتين.','error');return;}msg($('passwordMsg'),'جاري الحفظ…');const {error}=await supabase.auth.updateUser({password:p});if(error)msg($('passwordMsg'),error.message,'error');else{msg($('passwordMsg'),'تم تغيير كلمة المرور بنجاح.','success');setTimeout(closePasswordModal,800);}});
 
-async function requestPasswordReset() {
-  if (!supabase) return;
-  const email = $('email').value.trim();
-  if (!email) { setMsg($('authMsg'), 'أدخل بريدك الإلكتروني أولًا لاستلام رابط إعادة تعيين كلمة المرور.', 'error'); $('email').focus(); return; }
-  setMsg($('authMsg'), 'جاري إرسال رابط إعادة تعيين كلمة المرور…');
-  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: dashboardUrl() });
-  setMsg($('authMsg'), error ? error.message : 'تم إرسال الرابط. افحص بريدك الإلكتروني واتبع الرابط لإعادة تعيين كلمة المرور.', error ? 'error' : 'success');
-}
+$('settingsForm').addEventListener('submit',async e=>{e.preventDefault();const payload={user_id:userId,monthly_income:Number($('settingIncome').value||0),monthly_investment_target:Number($('settingInvestment').value||0),emergency_buffer_target:Number($('settingEmergency').value||0),personal_note:$('settingNote').value.trim(),updated_at:new Date().toISOString()};const {data,error}=await supabase.from('user_settings').upsert(payload).select().single();msg($('settingsMsg'),error?error.message:'تم حفظ الإعدادات.',error?'error':'success');if(data){state.settings=data;renderAll();}});
+$('budgetForm').addEventListener('submit',async e=>{e.preventDefault();const month=($('budgetMonth').value||monthNow())+'-01';const payload={user_id:userId,month,category:$('budgetCategory').value,amount:Number($('budgetAmount').value||0),priority:$('budgetPriority').value,notes:$('budgetNotes').value.trim()};const {error}=await supabase.from('monthly_budget').upsert(payload,{onConflict:'user_id,month,category'});if(error)alert(error.message);else{e.target.reset();$('budgetMonth').value=monthNow();await loadAll();}});
+$('investmentForm').addEventListener('submit',async e=>{e.preventDefault();const payload={user_id:userId,asset:$('asset').value.trim(),quantity:Number($('quantity').value||0),unit:$('unit').value.trim(),cost_basis:Number($('costBasis').value||0),market_value:$('marketValue').value===''?null:Number($('marketValue').value),notes:$('investmentNotes').value.trim(),updated_at:new Date().toISOString()};const {error}=await supabase.from('investment_positions').insert(payload);if(error)alert(error.message);else{e.target.reset();await loadAll();}});
+$('mobilityForm').addEventListener('submit',async e=>{e.preventDefault();const payload={user_id:userId,option_name:$('mobilityName').value.trim(),fuel_type:$('mobilityFuel').value,target_price:Number($('mobilityPrice').value||0),saved_amount:Number($('mobilitySaved').value||0),monthly_contribution:Number($('mobilityContribution').value||0),estimated_monthly_running_cost:Number($('mobilityRunning').value||0),notes:$('mobilityNotes').value.trim()};const {error}=await supabase.from('mobility_plans').insert(payload);if(error)alert(error.message);else{e.target.reset();await loadAll();}});
+$('careerForm').addEventListener('submit',async e=>{e.preventDefault();const payload={user_id:userId,title:$('careerTitle').value.trim(),track:$('careerTrack').value.trim()||'Cloud',status:$('careerStatus').value,target_date:$('careerDate').value||null,notes:$('careerNotes').value.trim()};const {error}=await supabase.from('career_tasks').insert(payload);if(error)alert(error.message);else{e.target.reset();$('careerTrack').value='Cloud / Azure';await loadAll();}});
+$('goalForm').addEventListener('submit',async e=>{e.preventDefault();const payload={user_id:userId,name:$('goalName').value.trim(),target_amount:Number($('goalTarget').value||0),saved_amount:Number($('goalSaved').value||0),priority:$('goalPriority').value,status:$('goalStatus').value,notes:$('goalNotes').value.trim()};const {error}=await supabase.from('goals').insert(payload);if(error)alert(error.message);else{e.target.reset();await loadAll();}});
 
-async function saveNewPassword() {
-  if (!supabase) return;
-  const password = $('newPassword').value;
-  const confirm = $('confirmPassword').value;
-  if (password.length < 12) { setMsg($('passwordMsg'), 'استخدم كلمة مرور من 12 حرفًا على الأقل.', 'error'); return; }
-  if (password !== confirm) { setMsg($('passwordMsg'), 'كلمتا المرور غير متطابقتين.', 'error'); return; }
-  setMsg($('passwordMsg'), 'جاري تحديث كلمة المرور…');
-  const { error } = await supabase.auth.updateUser({ password });
-  if (error) { setMsg($('passwordMsg'), error.message, 'error'); return; }
-  setMsg($('passwordMsg'), 'تم تغيير كلمة المرور بنجاح.', 'success');
-  setTimeout(closePasswordModal, 900);
-}
+document.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)return;const del=async(table,id)=>{const {error}=await supabase.from(table).delete().eq('id',id);if(error)alert(error.message);else await loadAll();};if(b.dataset.deleteBudget)del('monthly_budget',b.dataset.deleteBudget);if(b.dataset.deleteInvestment)del('investment_positions',b.dataset.deleteInvestment);if(b.dataset.deleteMobility)del('mobility_plans',b.dataset.deleteMobility);if(b.dataset.deleteCareer)del('career_tasks',b.dataset.deleteCareer);if(b.dataset.deleteGoal)del('goals',b.dataset.deleteGoal);});
 
-if (configured) {
-  supabase = createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY, {
-    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
-  });
-  supabase.auth.getSession().then(({ data: { session } }) => session ? showApp(session) : showAuth());
-  supabase.auth.onAuthStateChange((event, session) => {
-    if (event === 'PASSWORD_RECOVERY') { showApp(session); openPasswordModal(); return; }
-    session ? showApp(session) : showAuth();
-  });
-} else {
-  $('configWarning').hidden = false; $('login').disabled = true; $('signup').disabled = true; $('forgot').disabled = true;
-}
+document.querySelectorAll('.nav button').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));$(btn.dataset.view).classList.add('active');}));
+$('refreshAll').addEventListener('click',loadAll);
 
-$('login').addEventListener('click', async () => {
-  if (!supabase) return;
-  const email = $('email').value.trim(); const password = $('password').value;
-  if (!email || !password) { setMsg($('authMsg'), 'أدخل البريد الإلكتروني وكلمة المرور.', 'error'); return; }
-  setMsg($('authMsg'), 'جاري تسجيل الدخول…');
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-  setMsg($('authMsg'), error ? error.message : 'تم الدخول.', error ? 'error' : 'success');
-});
-
-$('signup').addEventListener('click', async () => {
-  if (!supabase) return;
-  const email = $('email').value.trim(); const password = $('password').value;
-  if (!email || !password) { setMsg($('authMsg'), 'أدخل البريد الإلكتروني وكلمة المرور.', 'error'); return; }
-  if (password.length < 12) { setMsg($('authMsg'), 'استخدم كلمة مرور من 12 حرفًا على الأقل.', 'error'); return; }
-  setMsg($('authMsg'), 'جاري إنشاء الحساب…');
-  const { data, error } = await supabase.auth.signUp({ email, password });
-  if (error) setMsg($('authMsg'), error.message, 'error');
-  else if (!data.session) setMsg($('authMsg'), 'تم إنشاء الحساب. افتح رسالة التأكيد في بريدك الإلكتروني ثم سجّل الدخول.', 'success');
-  else setMsg($('authMsg'), 'تم إنشاء الحساب وتسجيل الدخول.', 'success');
-});
-
-$('forgot').addEventListener('click', requestPasswordReset);
-$('changePassword').addEventListener('click', openPasswordModal);
-$('closePasswordModal').addEventListener('click', closePasswordModal);
-$('cancelPassword').addEventListener('click', closePasswordModal);
-$('savePassword').addEventListener('click', saveNewPassword);
-$('logout').addEventListener('click', async () => { if (supabase) await supabase.auth.signOut(); });
+if(configured){supabase=createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});supabase.auth.getSession().then(({data:{session}})=>session?showApp(session):showAuth());supabase.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY'){showApp(session);openPasswordModal();return;}session?showApp(session):showAuth();});}else{$('configWarning').hidden=false;$('login').disabled=true;$('signup').disabled=true;$('forgot').disabled=true;}
